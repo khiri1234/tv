@@ -55,3 +55,5 @@ input.f.focus{border-color:var(--acc)}
 .sub{font-size:22px;color:var(--dim);padding:0 10px 10px}
 
 .chiprow{display:flex;height:62px;overflow:hidden}.chiprow>*+*{margin-left:12px}
+
+.btn,.tab,.item,.card{cursor:pointer}

@@ -82,11 +82,11 @@ function loadLibrary() {
   var pl = activePl(); S.lib = null; S.err = '';
   if (!pl) { render(); return; }
   S.loading = true; render();
-  var job = pl.type === 'xtream' ? loadXtream(pl) : getText(pl.url).then(function (t) {
+  var job = pl.type === 'stream' ? Promise.resolve({ channels: [{ id: 's1', name: pl.name, logo: '', cat: 'Stream', num: 1, url: pl.url }], cats: ['Stream'], movies: [], series: [], mcats: [], scats: [] }) : pl.type === 'xtream' ? loadXtream(pl) : getText(pl.url).then(function (t) {
     if (t.indexOf('#EXTM3U') < 0 && t.indexOf('#EXTINF') < 0) throw new Error('This link is not an M3U playlist');
     return parseM3U(t);
   });
-  job.then(function (lib) { S.lib = lib; S.loading = false; S.catIdx = 0; S.chIdx = 0; render(); })
+  job.then(function (lib) { S.lib = lib; S.loading = false; S.catIdx = 0; S.chIdx = 0; render(); if (pl.type === 'stream' && lib.channels[0]) playChannel(lib.channels[0], true); })
      .catch(function (e) { S.loading = false; S.err = (e && e.message ? e.message : 'Could not load') + (/Failed to fetch|NetworkError/i.test(String(e)) ? ' (the server may block TV browsers. Try a proxy in Settings.)' : ''); render(); });
 }
 
@@ -113,7 +113,7 @@ function win(idx, len, n) { return clamp(idx - Math.floor(n / 2) + 1, 0, Math.ma
 function logoHTML(ch) { var i = (ch.name || '?').replace(/[^A-Za-z0-9]/g, '').slice(0, 2).toUpperCase() || 'TV'; return '<div class="lg">' + (ch.logo ? '<img src="' + esc(ch.logo) + '" onerror="this.remove()">' : '') + (ch.logo ? '' : i) + '</div>'; }
 function topHTML() {
   var h = '<div class="top"><div class="logo"><img src="logo.png" alt="H">TV</div>';
-  S.tabs.forEach(function (t, i) { h += '<div class="tab' + (i === S.tab ? ' on' : '') + (S.zone === 'tabs' && i === S.tab ? ' focus' : '') + '">' + t + '</div>'; });
+  S.tabs.forEach(function (t, i) { h += '<div data-z="tab" data-i="' + i + '" class="tab' + (i === S.tab ? ' on' : '') + (S.zone === 'tabs' && i === S.tab ? ' focus' : '') + '">' + t + '</div>'; });
   return h + '</div>';
 }
 function render() {
@@ -122,9 +122,9 @@ function render() {
   else if (S.view === 'series') h = seriesHTML();
   else {
     h = topHTML();
-    if (!activePl()) h += '<div class="body"><div class="form"><h2>Welcome to H TV</h2><p>H TV is a player only. Add your own M3U link or Xtream Codes login to start. No channels or content are included.</p><div class="btn pri focus">Add a playlist</div></div></div>';
+    if (!activePl()) h += '<div class="body"><div class="form"><h2>Welcome to H TV</h2><p>H TV is a player only. Add your own M3U link or Xtream Codes login to start. No channels or content are included.</p><div data-z="welcome" class="btn pri focus">Add a playlist</div></div></div>';
     else if (S.loading) h += '<div class="body"><div class="empty">Loading your playlist…</div></div>';
-    else if (S.err) h += '<div class="body"><div class="form"><h2>Could not load</h2><p>' + esc(S.err) + '</p><div class="btn pri focus">Try again</div></div></div>';
+    else if (S.err) h += '<div class="body"><div class="form"><h2>Could not load</h2><p>' + esc(S.err) + '</p><div data-z="retry" class="btn pri focus">Try again</div></div></div>';
     else if (S.tab === 0) h += liveHTML();
     else if (S.tab === 1 || S.tab === 2) h += gridHTML(S.tab === 1 ? 'm' : 's');
     else h += settingsHTML();
@@ -136,13 +136,13 @@ function liveHTML() {
   var cats = liveCats(), list = liveList(), n = 10, h = '<div class="body">';
   var s = win(S.catIdx, cats.length, n);
   h += '<div class="col cats">';
-  for (var i = s; i < Math.min(cats.length, s + n); i++) h += '<div class="item' + (i === S.catIdx ? ' sel' : '') + (S.zone === 'cats' && i === S.catIdx ? ' focus' : '') + '"><div class="t"><div class="t1">' + esc(cats[i]) + '</div></div></div>';
+  for (var i = s; i < Math.min(cats.length, s + n); i++) h += '<div data-z="cats" data-i="' + i + '" class="item' + (i === S.catIdx ? ' sel' : '') + (S.zone === 'cats' && i === S.catIdx ? ' focus' : '') + '"><div class="t"><div class="t1">' + esc(cats[i]) + '</div></div></div>';
   h += '</div><div class="col chans">';
   if (!list.length) h += '<div class="empty">' + (cats[S.catIdx] === 'Favorites' ? 'No favorites yet. Press Right on a channel to add one.' : 'No channels here.') + '</div>';
   s = win(S.chIdx, list.length, n);
   for (i = s; i < Math.min(list.length, s + n); i++) {
     var c = list[i], on = S.playing && S.playing.id === c.id;
-    h += '<div class="item' + (on ? ' sel' : '') + (S.zone === 'chans' && i === S.chIdx ? ' focus' : '') + '"><div class="n">' + esc(c.num) + '</div>' + logoHTML(c) + '<div class="t"><div class="t1">' + esc(c.name) + '</div></div>' + (isFav(c) ? '<div class="c" style="color:#facc15">★</div>' : '') + '</div>';
+    h += '<div data-z="chans" data-i="' + i + '" class="item' + (on ? ' sel' : '') + (S.zone === 'chans' && i === S.chIdx ? ' focus' : '') + '"><div class="n">' + esc(c.num) + '</div>' + logoHTML(c) + '<div class="t"><div class="t1">' + esc(c.name) + '</div></div>' + (isFav(c) ? '<div class="c" style="color:#facc15">★</div>' : '') + '</div>';
   }
   h += '</div><div class="col side"><div class="prev" id="prevbox">' + (S.playing ? '' : 'Press OK on a channel to preview') + '</div>';
   var cur = S.playing;
@@ -161,20 +161,20 @@ function gridHTML(kind) {
   if (row >= start + rows) start = row - rows + 1;
   var h = '<div class="body v"><div class="chiprow">';
   var cs = clamp(ci - 3, 0, Math.max(0, cats.length - 6));
-  for (var i = cs; i < Math.min(cats.length, cs + 6); i++) h += '<div class="tab' + (i === ci ? ' on' : '') + (S.zone === 'gcats' && i === ci ? ' focus' : '') + '" style="font-size:24px;white-space:nowrap">' + esc(cats[i]) + '</div>';
+  for (var i = cs; i < Math.min(cats.length, cs + 6); i++) h += '<div data-z="gcats" data-i="' + i + '" class="tab' + (i === ci ? ' on' : '') + (S.zone === 'gcats' && i === ci ? ' focus' : '') + '" style="font-size:24px;white-space:nowrap">' + esc(cats[i]) + '</div>';
   h += '</div>';
   if (!list.length) return h + '<div class="empty">' + (S.lib.movies.length || S.lib.series.length ? 'Nothing here.' : 'This playlist has no ' + (kind === 'm' ? 'movies' : 'series') + '. Movies and series need an Xtream Codes playlist.') + '</div></div>';
   h += '<div class="grid">';
   for (i = start * cols; i < Math.min(list.length, (start + rows) * cols); i++) {
     var c = list[i];
-    h += '<div class="card' + (S.zone === 'grid' && i === ix ? ' focus' : '') + '"><div class="p">' + (c.logo ? '<img src="' + esc(c.logo) + '" onerror="this.remove()">' : esc((c.name || '?').charAt(0))) + '</div><div class="ti">' + esc(c.name) + '</div></div>';
+    h += '<div data-z="grid" data-i="' + i + '" class="card' + (S.zone === 'grid' && i === ix ? ' focus' : '') + '"><div class="p">' + (c.logo ? '<img src="' + esc(c.logo) + '" onerror="this.remove()">' : esc((c.name || '?').charAt(0))) + '</div><div class="ti">' + esc(c.name) + '</div></div>';
   }
   return h + '</div></div>';
 }
-function fi(idx, label, cls) { return '<div class="btn ' + (cls || '') + ((S.view === 'setup' || S.zone === 'form') && S.fi === idx ? ' focus' : '') + '">' + label + '</div>'; }
+function fi(idx, label, cls) { return '<div data-z="form" data-i="' + idx + '" class="btn ' + (cls || '') + ((S.view === 'setup' || S.zone === 'form') && S.fi === idx ? ' focus' : '') + '">' + label + '</div>'; }
 function settingsHTML() {
   var h = '<div class="body"><div class="form"><h2>Settings</h2><p>Playlists (OK to switch)</p>', k = 0, i;
-  for (i = 0; i < S.playlists.length; i++, k++) h += '<div class="btn' + (S.playlists[i].id === S.active ? ' pri' : '') + (S.zone === 'form' && S.fi === k ? ' focus' : '') + '">' + esc(S.playlists[i].name) + (S.playlists[i].id === S.active ? '  (active)' : '') + '</div>';
+  for (i = 0; i < S.playlists.length; i++, k++) h += '<div data-z="form" data-i="' + k + '" class="btn' + (S.playlists[i].id === S.active ? ' pri' : '') + (S.zone === 'form' && S.fi === k ? ' focus' : '') + '">' + esc(S.playlists[i].name) + (S.playlists[i].id === S.active ? '  (active)' : '') + '</div>';
   h += fi(k++, 'Add playlist') + fi(k++, 'Reload playlist') + fi(k++, 'Remove active playlist');
   h += '<p style="margin-top:14px">Proxy (only if your provider blocks TV browsers). Leave empty normally.</p><input class="f' + (S.zone === 'form' && S.fi === k ? ' focus' : '') + '" id="proxy" placeholder="https://your-proxy.example/?url=" value="' + esc(S.proxy) + '"></div></div>';
   return h;
@@ -183,14 +183,16 @@ function settingsCount() { return S.playlists.length + 3 + 1; }
 function setupHTML() {
   var s = S.setup, h = topHTML().replace(/<div class="tab[^>]*>[^<]*<\/div>/g, '');
   h += '<div class="body"><div class="form"><h2>Add a playlist</h2><p>Only add playlists you have the right to use. H TV does not provide any content.</p>';
-  h += '<div class="seg"><div class="btn' + (s.type === 'xtream' ? ' on' : '') + (S.fi === 0 && S.fj === 0 ? ' focus' : '') + '">Xtream Codes</div><div class="btn' + (s.type === 'm3u' ? ' on' : '') + (S.fi === 0 && S.fj === 1 ? ' focus' : '') + '">M3U link</div></div>';
+  h += '<div class="seg"><div data-z="seg" data-i="0" class="btn' + (s.type === 'xtream' ? ' on' : '') + (S.fi === 0 && S.fj === 0 ? ' focus' : '') + '">Xtream Codes</div><div data-z="seg" data-i="1" class="btn' + (s.type === 'm3u' ? ' on' : '') + (S.fi === 0 && S.fj === 1 ? ' focus' : '') + '">M3U link</div><div data-z="seg" data-i="2" class="btn' + (s.type === 'stream' ? ' on' : '') + (S.fi === 0 && S.fj === 2 ? ' focus' : '') + '">Single stream</div></div>';
   var inp = function (id, ph, val, idx, type) { return '<input class="f' + (S.fi === idx ? ' focus' : '') + '" id="' + id + '" placeholder="' + ph + '" value="' + esc(val) + '"' + (type ? ' type="' + type + '"' : '') + '>'; };
   h += inp('f_name', 'Name (optional)', s.name, 1);
   if (s.type === 'xtream') h += inp('f_server', 'Server, e.g. http://example.com:8080', s.server, 2) + inp('f_user', 'Username', s.user, 3) + inp('f_pass', 'Password', s.pass, 4, 'password');
+  else if (s.type === 'stream') h += inp('f_url', 'Stream URL (.m3u8)', s.url, 2);
   else h += inp('f_url', 'Playlist URL (.m3u / .m3u8)', s.url, 2);
   h += fi(setupCount() - 2, 'Add and load', 'pri') + fi(setupCount() - 1, 'Cancel') + '</div></div>';
   return h;
 }
+var TYPES = ['xtream', 'm3u', 'stream'];
 function setupCount() { return S.setup.type === 'xtream' ? 7 : 5; }
 function seriesHTML() {
   var h = topHTML().replace(/<div class="tab[^>]*>[^<]*<\/div>/g, ''), eps = S.series.eps || [], n = 10, s = win(S.epIdx, eps.length, n);
@@ -286,7 +288,7 @@ function readInputs() {
 function addPlaylist() {
   readInputs(); var s = S.setup, pl;
   if (s.type === 'xtream') { if (!s.server.trim() || !s.user.trim()) return toast('Enter server and username'); pl = { type: 'xtream', server: s.server.trim(), user: s.user.trim(), pass: s.pass, name: s.name.trim() || s.server.trim() }; }
-  else { if (!/^https?:\/\//i.test(s.url.trim())) return toast('Enter a link starting with http'); pl = { type: 'm3u', url: s.url.trim(), name: s.name.trim() || 'My playlist' }; }
+  else { if (!/^https?:\/\//i.test(s.url.trim())) return toast('Enter a link starting with http'); pl = { type: s.type === 'stream' ? 'stream' : 'm3u', url: s.url.trim(), name: s.name.trim() || (s.type === 'stream' ? 'My stream' : 'My playlist') }; }
   pl.id = 'p' + Date.now(); S.playlists.push(pl); S.active = pl.id; store.set('playlists', S.playlists); store.set('active', S.active);
   S.view = 'main'; S.tab = 0; S.zone = 'chans'; S.catIdx = 0; loadLibrary();
 }
@@ -384,10 +386,10 @@ function key(e) {
 function setupKey(k, e) {
   var n = setupCount();
   if (isBack(e)) { if (S.playlists.length) { S.view = 'main'; S.zone = 'tabs'; render(); } return; }
-  if (S.fi === 0 && (k === K.L || k === K.R)) { S.fj = k === K.L ? 0 : 1; readInputs(); S.setup.type = S.fj === 0 ? 'xtream' : 'm3u'; render(); return; }
+  if (S.fi === 0 && (k === K.L || k === K.R)) { S.fj = clamp(S.fj + (k === K.L ? -1 : 1), 0, 2); readInputs(); S.setup.type = TYPES[S.fj]; render(); return; }
   if (k === K.U) S.fi = Math.max(0, S.fi - 1); else if (k === K.D) S.fi = Math.min(n - 1, S.fi + 1);
   else if (k === K.OK) {
-    if (S.fi === 0) { S.setup.type = S.fj === 0 ? 'xtream' : 'm3u'; render(); return; }
+    if (S.fi === 0) { S.setup.type = TYPES[S.fj]; render(); return; }
     if (S.fi === n - 2) return addPlaylist();
     if (S.fi === n - 1) { if (S.playlists.length) { S.view = 'main'; S.zone = 'tabs'; } render(); return; }
     render(); return focusInput();
@@ -402,6 +404,34 @@ function seriesKey(k, e) {
   render();
 }
 addEventListener('keydown', key);
+
+/* ---------- pointer / cursor-mode remotes: clicks do the same as the arrow keys ---------- */
+function fakeKey(code) { key({ keyCode: code, key: code === 13 ? 'Enter' : '', preventDefault: function () {}, stopPropagation: function () {} }); }
+function gridVars() { var m = S.tab === 1; return { ci: m ? 'mCat' : 'sCat', ii: m ? 'mIdx' : 'sIdx' }; }
+$('app').addEventListener('click', function (ev) {
+  var el = ev.target, root = this;
+  while (el && el !== root && !(el.getAttribute && el.getAttribute('data-z'))) el = el.parentNode;
+  if (!el || el === root) return;
+  var z = el.getAttribute('data-z'), i = parseInt(el.getAttribute('data-i'), 10), ae = document.activeElement;
+  if (S.view === 'setup') readInputs();
+  if (S.view === 'main' && $('proxy')) { S.proxy = $('proxy').value.trim(); store.set('proxy', S.proxy); }
+  if (ae && ae.tagName === 'INPUT') ae.blur();
+  if (z === 'welcome') return openSetup();
+  if (z === 'retry') return loadLibrary();
+  if (z === 'tab') { S.zone = 'tabs'; if (i === S.tab) { render(); return; } setTab(i); render(); return; }
+  if (z === 'seg') { readInputs(); S.fi = 0; S.fj = i; S.setup.type = TYPES[i]; render(); return; }
+  if (z === 'cats') { S.zone = 'cats'; S.catIdx = i; S.chIdx = 0; render(); return; }
+  if (z === 'chans') { S.zone = 'chans'; S.chIdx = i; render(); fakeKey(K.OK); return; }
+  if (z === 'gcats') { var g = gridVars(); S.zone = 'gcats'; S[g.ci] = i; S[g.ii] = 0; render(); return; }
+  if (z === 'grid') { var g2 = gridVars(); S.zone = 'grid'; S[g2.ii] = i; render(); fakeKey(K.OK); return; }
+  if (z === 'form') { if (S.view !== 'setup') S.zone = 'form'; S.fi = i; render(); fakeKey(K.OK); return; }
+});
+$('app').addEventListener('focusin', function (ev) {
+  var m = { f_name: 1, f_server: 2, f_user: 3, f_pass: 4, f_url: 2 }, id = ev.target && ev.target.id;
+  if (S.view === 'setup' && m[id]) S.fi = m[id];
+  if (id === 'proxy') { S.zone = 'form'; S.fi = settingsCount() - 1; }
+});
+$('full').addEventListener('click', function () { showOSD(); });
 
 /* ---------- boot ---------- */
 S.live = true;
