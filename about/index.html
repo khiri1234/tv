@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>H TV — Your playlists, on every screen</title>
+<meta name="description" content="H TV is a simple, private media player for iPhone, iPad, Apple TV and Mac. Add your own M3U playlist or Xtream Codes login and watch live TV, movies and series.">
+<meta property="og:title" content="H TV">
+<meta property="og:description" content="A simple, private media player for your own playlists. iPhone, iPad, Apple TV and Mac.">
+<meta property="og:image" content="../icon-512.png">
+<link rel="icon" href="../favicon.png">
+<link rel="apple-touch-icon" href="../icon-512.png">
+<style>
+:root{--bg:#f4f8fb;--card:#fff;--tx:#14202b;--dim:#5b6b7a;--blue:#5aa9d6;--blue-d:#2f7fb0;--gold:#c99a3a;--line:#dfe8ef}
+@media (prefers-color-scheme:dark){:root{--bg:#0e141a;--card:#16202a;--tx:#eef3f7;--dim:#93a4b3;--blue-d:#7cc0e8;--gold:#e0b75e;--line:#243240}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:17px/1.6 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx)}
+a{color:var(--blue-d)}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+header.hero{text-align:center;padding:72px 0 56px;background:linear-gradient(180deg,rgba(90,169,214,.22),transparent)}
+.hero img{width:148px;height:148px;border-radius:34px;box-shadow:0 14px 40px rgba(20,60,90,.25)}
+.hero h1{font-size:46px;line-height:1.1;margin-top:26px;letter-spacing:-.5px}
+.hero .tag{color:var(--gold);font-weight:700;letter-spacing:3px;font-size:13px;text-transform:uppercase;margin-top:12px}
+.hero p.lead{font-size:20px;color:var(--dim);max-width:600px;margin:18px auto 0}
+.plats{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:26px}
+.plats span{border:1px solid var(--line);background:var(--card);border-radius:30px;padding:6px 16px;font-size:15px;font-weight:600}
+section{padding:48px 0}
+h2{font-size:28px;text-align:center;margin-bottom:28px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px}
+.card h3{font-size:18px;margin-bottom:6px}
+.card p{color:var(--dim);font-size:16px}
+.card .ic{width:40px;height:40px;border-radius:12px;background:rgba(90,169,214,.18);color:var(--blue-d);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
+.steps{counter-reset:s;max-width:640px;margin:0 auto;list-style:none}
+.steps li{counter-increment:s;position:relative;padding:4px 0 18px 52px}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:var(--gold);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.note{max-width:720px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;padding:18px 22px;color:var(--dim);font-size:15px}
+footer{border-top:1px solid var(--line);padding:28px 0 40px;text-align:center;color:var(--dim);font-size:15px}
+footer a{margin:0 10px}
+@media (max-width:520px){.hero h1{font-size:34px}.hero p.lead{font-size:18px}.hero{padding-top:48px}}
+</style></head>
+<body>
+<header class="hero"><div class="wrap">
+  <img src="../icon-512.png" alt="H TV app icon">
+  <h1>H TV</h1>
+  <div class="tag">Live · Stream · Enjoy</div>
+  <p class="lead">A simple, private player for your own playlists. Live TV, movies and series, on every screen you own.</p>
+  <div class="plats"><span>iPhone</span><span>iPad</span><span>Apple TV</span><span>Mac</span></div>
+</div></header>
+
+<section><div class="wrap">
+  <h2>Everything you need, nothing you don't</h2>
+  <div class="grid">
+    <div class="card"><div class="ic">▶</div><h3>Live TV</h3><p>Browse channels by category, preview before going full screen, and switch channels with a swipe or the remote.</p></div>
+    <div class="card"><div class="ic">🎬</div><h3>Movies &amp; series</h3><p>With an Xtream Codes login, browse your provider's movies and series with posters and episode lists.</p></div>
+    <div class="card"><div class="ic">📋</div><h3>Program guide</h3><p>See what's on now and what's next for each channel.</p></div>
+    <div class="card"><div class="ic">★</div><h3>Favorites &amp; recents</h3><p>Keep the channels you love one tap away. Recently watched items are saved for you.</p></div>
+    <div class="card"><div class="ic">🔗</div><h3>M3U or Xtream Codes</h3><p>Add a playlist link or your server details. Use as many playlists as you like.</p></div>
+    <div class="card"><div class="ic">🔒</div><h3>Private by design</h3><p>No accounts, no ads, no analytics, no tracking. Your playlists stay on your device.</p></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Get started in a minute</h2>
+  <ol class="steps">
+    <li><strong>Download H TV</strong> on your iPhone, iPad, Apple TV or Mac.</li>
+    <li><strong>Add your playlist</strong> with an M3U link or your Xtream Codes server, username and password from your provider.</li>
+    <li><strong>Start watching.</strong> Your channels, guide, movies and series load right away.</li>
+  </ol>
+</div></section>
+
+<section><div class="wrap">
+  <div class="note"><strong>H TV is a player only.</strong> It does not provide, host or include any channels, streams or other content. You need your own playlist from a provider, and you are responsible for using only content you have the legal right to access.</div>
+</div></section>
+
+<footer><div class="wrap">
+  <p><a href="mailto:Hatef@hatef.cc">Support: Hatef@hatef.cc</a><a href="../privacy/">Privacy Policy</a></p>
+  <p style="margin-top:10px">© 2026 Hatef Hajizadeh</p>
+</div></footer>
+</body></html>
